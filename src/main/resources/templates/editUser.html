@@ -15,7 +15,7 @@
 <div class="container">
     <h2>sua nhan vien hu hong</h2>
     <p></p>
-    <form  method="post" th:object="${user}">
+    <form  method="post" th:object="${user}" enctype="multipart/form-data">
         <table class="table table-dark">
             <tbody>
             <tr>
@@ -34,9 +34,10 @@
                 <td><select th:field="*{role}">
                     <option th:each="b : ${role}" th:text="${b.role_name}" th:value="${b.id}"></option>
                 </select></td>
-                <td><input th:field="*{img}"></td>
-<!--                <td><img th:src="${user.img}" width="150" height="100" alt=""></td>-->
-<!--                <td><input type="file" name="uppImg"></td>-->
+
+                <td><img th:src="${user.img}" width="150" height="100" alt=""></td>
+                <td><input th:field="*{img}" hidden></td>
+                <td><input type="file" name="uppImg"></td>
             </tr>
             <tr>
                 <td style="color: red" th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}"></td>

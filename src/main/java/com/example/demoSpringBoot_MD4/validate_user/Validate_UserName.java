@@ -22,7 +22,7 @@ public class Validate_UserName implements Validator {
         User user = (User) target;
         List<User> users = userService.findAll();
         for (User u: users) {
-            if (user.getUserName().equals(u.getUserName())){
+            if (user.getUserName().equals(u.getUserName()) && (u.getId() != user.getId())){
                 errors.rejectValue("userName","","userName da ton tai, moi nhap ten khac");
                 return;
             }

@@ -1,13 +1,13 @@
 package com.example.demoSpringBoot_MD4.controller;
 
+import com.example.demoSpringBoot_MD4.model.Role;
 import com.example.demoSpringBoot_MD4.model.User;
 import com.example.demoSpringBoot_MD4.service.IRoleService;
 import com.example.demoSpringBoot_MD4.service.IUserService;
 import com.example.demoSpringBoot_MD4.validate_user.Validate_UserName;
-import lombok.Value;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.validation.BindingResult;
@@ -31,7 +31,8 @@ public class UserController {
     IRoleService roleService;
     @Autowired
     Validate_UserName validate_userName;
-
+    @Value("${uploadPart}")
+    private String uploadPart;
     @GetMapping("/user")
     public ModelAndView showUser(@RequestParam(defaultValue = "0") int page) {
         ModelAndView modelAndView = new ModelAndView("showUser");
@@ -43,48 +44,65 @@ public class UserController {
     public ModelAndView createForm() {
         ModelAndView modelAndView = new ModelAndView("createUser");
         modelAndView.addObject("user", new User());
-        modelAndView.addObject("role", roleService.findall());
         return modelAndView;
+    }
+    @ModelAttribute ("role")
+    public List<Role> show(){
+        return roleService.findall();
     }
 
     @PostMapping("create")
-    public ModelAndView add(@Valid @ModelAttribute(value = "user") User user, BindingResult bindingResult,@RequestParam MultipartFile uppImg) {
+    public Object add(@Valid @ModelAttribute(value = "user") User user, BindingResult bindingResult,@RequestParam MultipartFile uppImg) {
         validate_userName.validate(user, bindingResult);
         if (bindingResult.hasFieldErrors()){
             ModelAndView modelAndView = new ModelAndView("createUser");
-            modelAndView.addObject("role", roleService.findall());
             return modelAndView;
         }
         String filename = uppImg.getOriginalFilename();
         try {
-            FileCopyUtils.copy(uppImg.getBytes(),new File("C:/Users/Admind/Desktop/demoSpringBoot_MD4/src/main/resources/static/img/" + filename));
+            FileCopyUtils.copy(uppImg.getBytes(),new File(uploadPart+"img/" + filename));
+            user.setImg("img/" +filename);
+            userService.save(user);
+
         } catch (IOException e) {
+            user.setImg("https://image.lag.vn/upload/news/20/11/18/cosplay-nezuko-phien-ban-dam-phat-chet-luon-3_RGKE.jpg");
+            userService.save(user);
             e.printStackTrace();
         }
-        user.setImg("/img/" +filename);
-        userService.save(user);
-        ModelAndView modelAndView = new ModelAndView("redirect:/user");
-        return modelAndView;
+        return "redirect:/user";
     }
 
     @GetMapping("edit")
     public ModelAndView edit(@RequestParam long id) {
         ModelAndView modelAndView = new ModelAndView("editUser");
         modelAndView.addObject("user", userService.findById(id));
-        modelAndView.addObject("role", roleService.findall());
         return modelAndView;
     }
 
     @PostMapping("edit")
-    public ModelAndView editUser(@Valid @ModelAttribute(value = "user") User user,BindingResult bindingResult) {
+    public Object editUser(@Valid @ModelAttribute(value = "user") User user, BindingResult bindingResult, @RequestParam MultipartFile uppImg) {
+       validate_userName.validate(user,bindingResult);
         if (bindingResult.hasFieldErrors()){
             ModelAndView modelAndView = new ModelAndView("editUser");
-            modelAndView.addObject("role", roleService.findall());
             return modelAndView;
         }
-        userService.save(user);
-        ModelAndView modelAndView = new ModelAndView("redirect:/user");
-        return modelAndView;
+        if (uppImg.getSize() != 0) {
+            String file1 = uploadPart + user.getImg();
+            File file = new File(file1);
+            file.delete();
+            String nameFile = uppImg.getOriginalFilename();
+            try {
+                FileCopyUtils.copy(uppImg.getBytes(), new File(uploadPart +"img/"+ nameFile));
+                user.setImg("img/" + nameFile);
+                userService.save(user);
+            } catch (IOException e) {
+                user.setImg("https://image.lag.vn/upload/news/20/11/18/cosplay-nezuko-phien-ban-dam-phat-chet-luon-3_RGKE.jpg");
+                userService.save(user);
+                e.printStackTrace();
+            }
+
+        }
+        return "redirect:/user";
     }
 
     @GetMapping("/delete")
@@ -96,6 +114,17 @@ public class UserController {
 
     @PostMapping("/delete")
     public String delete(@RequestParam long id) {
+        User user = userService.findById(id);
+        if(user.getImg().isEmpty()){
+            userService.delete(id);
+            return "redirect:/product";
+        }
+        String filedelete = user.getImg().replaceAll("/img/","");
+        String file1 = "C:\\Users\\Admind\\Desktop\\demoSpringBoot_MD4\\src\\main\\resources\\static\\img/" +filedelete;
+        File file = new File(file1);
+        if(file.exists()){
+            file.delete();
+        }
         userService.delete(id);
         return "redirect:/user";
     }
