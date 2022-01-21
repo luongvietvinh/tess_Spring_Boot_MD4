@@ -81,7 +81,7 @@
         <tr th:each="u,lopp : ${user}">
             <td th:text="*{lopp.count}"></td>
             <label for="vinh">
-                <td id="vinh"><a th:href="@{/detail(id=${u.id})}"><img th:src="${u.img}" width="100" height="50" alt=""></a></td>
+                <td id="vinh"><a th:href="@{/detail(id=${u.id})}"><img th:src="${u.img}" width="150" height="100" alt=""></a></td>
 
             </label>
             <td th:text="*{u.userName}"></td>

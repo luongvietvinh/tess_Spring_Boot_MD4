@@ -33,6 +33,7 @@ public class UserController {
     Validate_UserName validate_userName;
     @Value("${uploadPart}")
     private String uploadPart;
+
     @GetMapping("/user")
     public ModelAndView showUser(@RequestParam(defaultValue = "0") int page) {
         ModelAndView modelAndView = new ModelAndView("showUser");
@@ -65,7 +66,7 @@ public class UserController {
             userService.save(user);
 
         } catch (IOException e) {
-            user.setImg("https://image.lag.vn/upload/news/20/11/18/cosplay-nezuko-phien-ban-dam-phat-chet-luon-3_RGKE.jpg");
+            user.setImg("");
             userService.save(user);
             e.printStackTrace();
         }
@@ -80,7 +81,7 @@ public class UserController {
     }
 
     @PostMapping("edit")
-    public Object editUser(@Valid @ModelAttribute(value = "user") User user, BindingResult bindingResult, @RequestParam MultipartFile uppImg) {
+    public Object editUser(@Valid @ModelAttribute(value = "user") User user, BindingResult bindingResult, @RequestParam ("uppImg") MultipartFile uppImg) {
        validate_userName.validate(user,bindingResult);
         if (bindingResult.hasFieldErrors()){
             ModelAndView modelAndView = new ModelAndView("editUser");
@@ -96,7 +97,7 @@ public class UserController {
                 user.setImg("img/" + nameFile);
                 userService.save(user);
             } catch (IOException e) {
-                user.setImg("https://image.lag.vn/upload/news/20/11/18/cosplay-nezuko-phien-ban-dam-phat-chet-luon-3_RGKE.jpg");
+                user.setImg("");
                 userService.save(user);
                 e.printStackTrace();
             }
@@ -119,8 +120,8 @@ public class UserController {
             userService.delete(id);
             return "redirect:/product";
         }
-        String filedelete = user.getImg().replaceAll("/img/","");
-        String file1 = "C:\\Users\\Admind\\Desktop\\demoSpringBoot_MD4\\src\\main\\resources\\static\\img/" +filedelete;
+        String filedelete = user.getImg().replaceAll("img/","");
+        String file1 = uploadPart + "img/" +filedelete;
         File file = new File(file1);
         if(file.exists()){
             file.delete();

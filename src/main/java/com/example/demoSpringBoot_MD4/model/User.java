@@ -3,6 +3,7 @@ package com.example.demoSpringBoot_MD4.model;
 import lombok.Data;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
@@ -20,6 +21,7 @@ public class User {
     @NotEmpty(message = "phoneNumber ko duoc de trong")
     private String phoneNumber;
     @NotEmpty(message = "email ko duoc de trong")
+    @Email
     private String email;
     private String img;
     @ManyToOne
